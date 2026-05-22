@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useT } from '@/src/hooks/useT';
@@ -14,7 +19,7 @@ interface RestTimerProps {
 export function RestTimer({ seconds, onSkip, onFinish, onAddTime }: RestTimerProps) {
   const [remaining, setRemaining] = useState(seconds);
   const initialRef = useRef(seconds);
-  const progressAnim = useRef(new Animated.Value(1)).current;
+  const progress = useSharedValue<number>(1);
   const t = useT();
 
   useEffect(() => {
@@ -33,14 +38,14 @@ export function RestTimer({ seconds, onSkip, onFinish, onAddTime }: RestTimerPro
       setRemaining((prev) => Math.max(0, prev - 1));
     }, 1000);
 
-    Animated.timing(progressAnim, {
-      toValue: remaining / initialRef.current,
-      duration: 900,
-      useNativeDriver: false,
-    }).start();
+    progress.value = withTiming(remaining / initialRef.current, { duration: 900 });
 
     return () => clearInterval(interval);
   }, [remaining]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: `${progress.value * 100}%`,
+  }));
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
@@ -93,6 +98,10 @@ export function RestTimer({ seconds, onSkip, onFinish, onAddTime }: RestTimerPro
             <Text className="font-extrabold text-dark-900">+15s</Text>
           </TouchableOpacity>
         </View>
+        <Animated.View
+          style={animatedStyle}
+          className="h-1 bg-accent-300 rounded-full mt-4"
+        />
       </LinearGradient>
     </View>
   );

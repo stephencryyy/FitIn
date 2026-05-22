@@ -13,8 +13,16 @@ import { SUPPORTED_LOCALES, SupportedLocale } from '@/src/i18n';
 export default function Settings() {
   const router = useRouter();
   const { user, profile, refreshProfile } = useAuth();
-  const { locale, setLocale, unitSystem, setUnitSystem, restTimerDefault, setRestTimerDefault } =
-    useSettingsStore();
+  const {
+    locale,
+    setLocale,
+    unitSystem,
+    setUnitSystem,
+    restTimerDefault,
+    setRestTimerDefault,
+    darkMode,
+    setDarkMode,
+  } = useSettingsStore();
   const t = useT();
 
   const [langModalOpen, setLangModalOpen] = useState(false);
@@ -41,16 +49,18 @@ export default function Settings() {
   const currentLocale = SUPPORTED_LOCALES.find((l) => l.code === locale) ?? SUPPORTED_LOCALES[0];
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-50">
-      <View className="flex-row items-center px-5 py-3 bg-white border-b border-dark-100">
+    <SafeAreaView className="flex-1 bg-dark-50 dark:bg-dark-900">
+      <View className="flex-row items-center px-5 py-3 bg-white dark:bg-dark-800 border-b border-dark-100 dark:border-dark-700">
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#334155" />
+          <Ionicons name="arrow-back" size={24} color={darkMode ? '#E2E8F0' : '#334155'} />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-dark-900 ml-3">{t('settings.title')}</Text>
+        <Text className="text-lg font-bold text-dark-900 dark:text-white ml-3">
+          {t('settings.title')}
+        </Text>
       </View>
 
       <ScrollView contentContainerClassName="p-5 pb-24">
-        <Text className="text-sm font-semibold text-dark-500 uppercase mb-2">
+        <Text className="text-sm font-semibold text-dark-500 dark:text-dark-300 uppercase mb-2">
           {t('settings.preferences')}
         </Text>
         <Card className="mb-5">
@@ -105,6 +115,35 @@ export default function Settings() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Dark Mode */}
+          <TouchableOpacity
+            onPress={() => setDarkMode(!darkMode)}
+            className="flex-row items-center py-3 border-b border-dark-100 dark:border-dark-700"
+            accessibilityRole="switch"
+            accessibilityState={{ checked: darkMode }}
+          >
+            <Ionicons
+              name={darkMode ? 'moon' : 'moon-outline'}
+              size={22}
+              color={darkMode ? '#A0ABFF' : '#64748B'}
+            />
+            <View className="flex-1 ml-3">
+              <Text className="font-semibold text-dark-900 dark:text-white">
+                {t('settings.darkMode')}
+              </Text>
+              <Text className="text-xs text-dark-400 dark:text-dark-300 mt-0.5">
+                {t('settings.darkModeDesc')}
+              </Text>
+            </View>
+            <View
+              className={`w-12 h-7 rounded-full p-1 ${
+                darkMode ? 'bg-primary-500' : 'bg-dark-200'
+              }`}
+            >
+              <View className={`w-5 h-5 bg-white rounded-full ${darkMode ? 'ml-auto' : ''}`} />
+            </View>
+          </TouchableOpacity>
 
           {/* Rest Timer */}
           <View className="flex-row items-center py-3">

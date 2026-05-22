@@ -341,6 +341,8 @@ export default {
     unitsDesc: 'Метрические или имперские',
     restTimer: 'Таймер отдыха',
     restTimerDesc: 'По умолчанию между подходами',
+    darkMode: 'Тёмная тема',
+    darkModeDesc: 'Использовать тёмное оформление',
     notifications: 'Уведомления',
     pushNotifications: 'Push-уведомления',
     pushNotificationsDesc: 'Алерты, рекорды, напоминания',

@@ -1,13 +1,16 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import 'react-native-reanimated';
+import { colorScheme } from 'nativewind';
 import '@/global.css';
 
 import { AuthProvider, useAuth } from '@/src/providers/AuthProvider';
 import { QueryProvider } from '@/src/providers/QueryProvider';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSettingsStore } from '@/src/store/settingsStore';
 
 function RootNavigator() {
   const { user, loading, isOnboarded } = useAuth();
@@ -41,15 +44,26 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const darkMode = useSettingsStore((s) => s.darkMode);
+
+  // Sync settings store -> NativeWind color scheme. Runs on mount and whenever
+  // the user toggles dark mode in settings. NativeWind v4 exposes `colorScheme.set`
+  // (the `setColorScheme` named export only exists on the hook).
+  useEffect(() => {
+    colorScheme.set(darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <QueryProvider>
-          <AuthProvider>
-            <RootNavigator />
-            <StatusBar style="auto" />
-          </AuthProvider>
-        </QueryProvider>
+        <View className="flex-1 bg-white dark:bg-dark-900">
+          <QueryProvider>
+            <AuthProvider>
+              <RootNavigator />
+              <StatusBar style={darkMode ? 'light' : 'auto'} />
+            </AuthProvider>
+          </QueryProvider>
+        </View>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

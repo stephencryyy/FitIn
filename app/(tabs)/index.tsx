@@ -42,17 +42,17 @@ export default function HomeScreen() {
   const dateStr = format(new Date(), 'd MMM');
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-50">
+    <SafeAreaView className="flex-1 bg-dark-50 dark:bg-dark-900">
       <ScrollView
         contentContainerClassName="pb-28"
         refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} />}
       >
         {/* Header */}
         <View className="px-5 pt-4 pb-5">
-          <Text className="text-xs font-extrabold uppercase tracking-wide text-accent-500">
+          <Text className="text-xs font-extrabold uppercase tracking-wide text-accent-500 dark:text-accent-300">
             {dayOfWeek} • {dateStr}
           </Text>
-          <Text className="text-[34px] font-extrabold text-dark-900 tracking-tight mt-2">
+          <Text className="text-[34px] font-extrabold text-dark-900 dark:text-white tracking-tight mt-2">
             {greeting}, {firstName}
           </Text>
         </View>

@@ -16,8 +16,12 @@ export default function TabLayout() {
   const isActiveWorkoutScreen = pathname?.includes('/workouts/active');
   const showFab = !activeWorkout && !isActiveWorkoutScreen;
 
+  // TODO(dark-mode): tabBarStyle uses static colors via expo-router's screenOptions
+  // (it doesn't run through NativeWind's className resolver), so dark variants
+  // for the floating tab bar need an explicit `useColorScheme()` swap. Left as
+  // a follow-up — covered by the dark mode foundation pass.
   return (
-    <View className="flex-1 bg-dark-50">
+    <View className="flex-1 bg-dark-50 dark:bg-dark-900">
       <Tabs
         key={locale}
         screenOptions={{

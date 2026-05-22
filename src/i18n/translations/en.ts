@@ -336,6 +336,8 @@ export default {
     unitsDesc: 'Metric or Imperial',
     restTimer: 'Rest Timer',
     restTimerDesc: 'Default duration between sets',
+    darkMode: 'Dark Mode',
+    darkModeDesc: 'Use dark theme across the app',
     notifications: 'Notifications',
     pushNotifications: 'Push Notifications',
     pushNotificationsDesc: 'Follow alerts, PRs, reminders',

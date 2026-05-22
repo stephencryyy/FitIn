@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-50">
+    <SafeAreaView className="flex-1 bg-dark-50 dark:bg-dark-900">
       <ScrollView contentContainerClassName="pb-28">
         {/* Profile Hero */}
         <View className="px-5 pt-4 mb-5">

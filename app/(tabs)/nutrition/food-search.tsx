@@ -92,6 +92,7 @@ export default function FoodSearch() {
         <FlashList
           data={data.foods}
           keyExtractor={(item) => item.foodId}
+          contentContainerStyle={{ paddingBottom: 110 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => handleSelect(item)}

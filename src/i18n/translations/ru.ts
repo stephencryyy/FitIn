@@ -21,6 +21,7 @@ export default {
     complete: 'Завершить',
     retry: 'Повторить',
     settings: 'Настройки',
+    loadMore: 'Загрузить ещё',
   },
   auth: {
     signIn: 'Войти',
@@ -294,6 +295,9 @@ export default {
     membersCount_one: '%{count} участник',
     membersCount_few: '%{count} участника',
     membersCount_many: '%{count} участников',
+    deleteTeam: 'Удалить команду',
+    deleteConfirm: 'Удалить команду?',
+    deleteConfirmDesc: 'Команда, все участники и сообщения будут удалены навсегда. Это действие нельзя отменить.',
   },
   complete: {
     greatWork: 'Отличная работа!',

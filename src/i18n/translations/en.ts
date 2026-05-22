@@ -21,6 +21,7 @@ export default {
     complete: 'Complete',
     retry: 'Retry',
     settings: 'Settings',
+    loadMore: 'Load more',
   },
   auth: {
     signIn: 'Sign In',
@@ -293,6 +294,9 @@ export default {
     you: 'You',
     membersCount_one: '%{count} member',
     membersCount_other: '%{count} members',
+    deleteTeam: 'Delete team',
+    deleteConfirm: 'Delete team?',
+    deleteConfirmDesc: 'This permanently removes the team, all members, and all messages. This cannot be undone.',
   },
   complete: {
     greatWork: 'Great work!',

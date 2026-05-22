@@ -10,7 +10,7 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { secureAuthPersistence } from './authPersistence';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -25,14 +25,18 @@ const app = initializeApp(firebaseConfig);
 
 let auth: Auth;
 if (Platform.OS === 'web') {
+  // On web, Firebase uses browser storage (IndexedDB/localStorage) automatically.
   auth = getAuth(app);
 } else {
   try {
+    // On native, persist auth tokens in OS-level secure storage (Keychain /
+    // EncryptedSharedPreferences) instead of plain AsyncStorage.
+    // See src/lib/firebase/authPersistence.ts for fallback + migration logic.
     auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
+      persistence: getReactNativePersistence(secureAuthPersistence),
     });
   } catch {
-    // Already initialized
+    // Already initialized (fast-refresh, multi-instance) — reuse.
     auth = getAuth(app);
   }
 }

@@ -18,7 +18,7 @@ interface SetRowProps {
  * - cardio: MIN | SEC (duration as separate fields)
  * - flexibility: MIN | SEC (duration as separate fields)
  */
-export function SetRow({ set, category, onUpdate, onComplete }: SetRowProps) {
+function SetRowImpl({ set, category, onUpdate, onComplete }: SetRowProps) {
   const t = useT();
 
   // Duration helpers: store as total seconds, edit as min + sec
@@ -184,7 +184,14 @@ export function SetRow({ set, category, onUpdate, onComplete }: SetRowProps) {
         </Text>
       </View>
       {renderInputs()}
-      <TouchableOpacity onPress={onComplete} className="w-8 items-center">
+      <TouchableOpacity
+        onPress={onComplete}
+        className="w-8 items-center"
+        accessibilityRole="checkbox"
+        accessibilityLabel={`Set ${set.setNumber}`}
+        accessibilityHint={set.completed ? 'Mark set as incomplete' : 'Mark set as complete'}
+        accessibilityState={{ checked: set.completed }}
+      >
         <Ionicons
           name={set.completed ? 'checkmark-circle' : 'ellipse-outline'}
           size={22}
@@ -194,6 +201,8 @@ export function SetRow({ set, category, onUpdate, onComplete }: SetRowProps) {
     </View>
   );
 }
+
+export const SetRow = React.memo(SetRowImpl);
 
 export function SetHeader({ category }: { category: ExerciseCategory }) {
   const t = useT();

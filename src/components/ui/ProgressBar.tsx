@@ -8,18 +8,21 @@ interface ProgressBarProps {
   showPercentage?: boolean;
   height?: number;
   tall?: boolean;
+  accessibilityLabel?: string;
 }
 
-export function ProgressBar({
+function ProgressBarImpl({
   progress,
   color = 'bg-primary-500',
   label,
   showPercentage = false,
   height,
   tall = false,
+  accessibilityLabel,
 }: ProgressBarProps) {
   const clampedProgress = Math.min(Math.max(progress, 0), 1);
   const barHeight = height ?? (tall ? 14 : 10);
+  const percent = Math.round(clampedProgress * 100);
 
   return (
     <View className="w-full">
@@ -28,7 +31,7 @@ export function ProgressBar({
           {label && <Text className="text-sm font-semibold text-dark-400">{label}</Text>}
           {showPercentage && (
             <Text className="text-sm font-extrabold text-dark-900">
-              {Math.round(clampedProgress * 100)}%
+              {percent}%
             </Text>
           )}
         </View>
@@ -36,6 +39,10 @@ export function ProgressBar({
       <View
         className="w-full bg-dark-100 overflow-hidden"
         style={{ height: barHeight, borderRadius: 999 }}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel={accessibilityLabel ?? label ?? 'Progress'}
+        accessibilityValue={{ min: 0, max: 100, now: percent }}
       >
         <View
           className={`h-full ${color}`}
@@ -45,3 +52,5 @@ export function ProgressBar({
     </View>
   );
 }
+
+export const ProgressBar = React.memo(ProgressBarImpl);

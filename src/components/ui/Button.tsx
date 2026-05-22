@@ -11,9 +11,11 @@ interface ButtonProps {
   disabled?: boolean;
   icon?: React.ReactNode;
   fullWidth?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
-export function Button({
+function ButtonImpl({
   title,
   onPress,
   variant = 'primary',
@@ -22,6 +24,8 @@ export function Button({
   disabled = false,
   icon,
   fullWidth = false,
+  accessibilityLabel,
+  accessibilityHint,
 }: ButtonProps) {
   const sizeClasses = { sm: 'px-3 py-2.5', md: 'px-5 py-3.5', lg: 'px-6 py-4' };
   const textSizeClasses = { sm: 'text-sm', md: 'text-base', lg: 'text-lg' };
@@ -45,6 +49,13 @@ export function Button({
     </>
   );
 
+  const a11y = {
+    accessibilityRole: 'button' as const,
+    accessibilityLabel: accessibilityLabel ?? (title || undefined),
+    accessibilityHint,
+    accessibilityState: { disabled: disabled || loading, busy: loading },
+  };
+
   // Primary: gradient orange button with shadow
   if (variant === 'primary') {
     return (
@@ -60,6 +71,7 @@ export function Button({
           shadowRadius: 28,
           elevation: 8,
         }}
+        {...a11y}
       >
         <LinearGradient
           colors={['#ff815e', '#ff6b3d', '#ff8d62']}
@@ -88,8 +100,11 @@ export function Button({
       disabled={disabled || loading}
       className={`flex-row items-center justify-center rounded-xl ${sizeClasses[size]} ${style.bg} ${style.border || ''} ${widthClass} ${disabledClass}`}
       activeOpacity={0.7}
+      {...a11y}
     >
       {renderContent(style.textColor)}
     </TouchableOpacity>
   );
 }
+
+export const Button = React.memo(ButtonImpl);

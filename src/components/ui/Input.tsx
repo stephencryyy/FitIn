@@ -15,9 +15,11 @@ interface InputProps {
   numberOfLines?: number;
   editable?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
-export function Input({
+function InputImpl({
   label,
   placeholder,
   value,
@@ -30,9 +32,14 @@ export function Input({
   numberOfLines = 1,
   editable = true,
   icon,
+  accessibilityLabel,
+  accessibilityHint,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+
+  const a11yLabel = accessibilityLabel ?? label ?? placeholder;
+  const a11yHint = accessibilityHint ?? error;
 
   return (
     <View className="mb-4">
@@ -70,9 +77,15 @@ export function Input({
           editable={editable}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          accessibilityLabel={a11yLabel}
+          accessibilityHint={a11yHint}
         />
         {secureTextEntry && (
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+          >
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={22}
@@ -82,8 +95,12 @@ export function Input({
         )}
       </View>
       {error && (
-        <Text className="text-sm text-danger-500 mt-1">{error}</Text>
+        <Text className="text-sm text-danger-500 mt-1" accessibilityLiveRegion="polite">
+          {error}
+        </Text>
       )}
     </View>
   );
 }
+
+export const Input = React.memo(InputImpl);

@@ -15,7 +15,7 @@ interface DateInputProps {
  * Accepts formats: YYYYMMDD, YYYY-MM-DD, YYYY.MM.DD, DDMMYYYY
  * Normalizes to YYYY-MM-DD
  */
-export function DateInput({ label, value, onChangeText, error, placeholder = 'YYYY-MM-DD' }: DateInputProps) {
+function DateInputImpl({ label, value, onChangeText, error, placeholder = 'YYYY-MM-DD' }: DateInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (text: string) => {
@@ -74,13 +74,17 @@ export function DateInput({ label, value, onChangeText, error, placeholder = 'YY
           maxLength={10}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          accessibilityLabel={label ?? 'Date'}
+          accessibilityHint="Enter a date in year-month-day format"
         />
       </View>
       {showError && (
-        <Text className="text-sm text-danger-500 mt-1">
+        <Text className="text-sm text-danger-500 mt-1" accessibilityLiveRegion="polite">
           {error || 'Invalid date'}
         </Text>
       )}
     </View>
   );
 }
+
+export const DateInput = React.memo(DateInputImpl);

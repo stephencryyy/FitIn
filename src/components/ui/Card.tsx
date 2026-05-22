@@ -10,6 +10,8 @@ interface CardProps {
   className?: string;
   padded?: boolean;
   variant?: CardVariant;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 const GRADIENT_COLORS: Record<string, [string, string, string]> = {
@@ -19,15 +21,25 @@ const GRADIENT_COLORS: Record<string, [string, string, string]> = {
   blue: ['#eef2ff', '#ffffff', '#f7fbff'],
 };
 
-export function Card({
+function CardImpl({
   children,
   onPress,
   className = '',
   padded = true,
   variant = 'default',
+  accessibilityLabel,
+  accessibilityHint,
 }: CardProps) {
   const paddingClass = padded ? 'p-5' : '';
   const baseClasses = `rounded-3xl overflow-hidden ${paddingClass} ${className}`;
+
+  const pressableA11y = onPress
+    ? {
+        accessibilityRole: 'button' as const,
+        accessibilityLabel,
+        accessibilityHint,
+      }
+    : {};
 
   if (variant !== 'default' && variant !== 'glass') {
     const colors = GRADIENT_COLORS[variant];
@@ -45,7 +57,7 @@ export function Card({
 
     if (onPress) {
       return (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7} {...pressableA11y}>
           {content}
         </TouchableOpacity>
       );
@@ -65,6 +77,7 @@ export function Card({
         activeOpacity={0.7}
         className={defaultClasses}
         style={{ shadowColor: '#183558', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.08, shadowRadius: 28, elevation: 4 }}
+        {...pressableA11y}
       >
         {children}
       </TouchableOpacity>
@@ -80,3 +93,5 @@ export function Card({
     </View>
   );
 }
+
+export const Card = React.memo(CardImpl);

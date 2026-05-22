@@ -5,6 +5,7 @@
 Построено на **React Native + Expo SDK 54**, **Firebase** (Auth / Firestore / Cloud Functions) и **Claude Sonnet 4.6**.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Expo](https://img.shields.io/badge/Expo-SDK_54-000020?logo=expo&logoColor=white)](https://expo.dev/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/stephencryyy/FitIn/actions/workflows/ci.yml/badge.svg)](https://github.com/stephencryyy/FitIn/actions/workflows/ci.yml)
 
 ---
 

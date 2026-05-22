@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -8,7 +8,7 @@ import { Button } from '@/src/components/ui/Button';
 import { Card } from '@/src/components/ui/Card';
 import { EmptyState } from '@/src/components/ui/EmptyState';
 import { RestTimer } from '@/src/components/workout/RestTimer';
-import { SetRow, SetHeader } from '@/src/components/workout/SetRow';
+import { ExerciseCard } from '@/src/components/workout/ExerciseCard';
 import { useWorkoutStore } from '@/src/store/workoutStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { useAuth } from '@/src/providers/AuthProvider';
@@ -52,36 +52,41 @@ export default function ActiveWorkout() {
     }
   }, [activeWorkout]);
 
-  if (!activeWorkout) return null;
+  const totalVolume = useMemo(() => {
+    if (!activeWorkout) return 0;
+    return activeWorkout.exercises.reduce((sum, ex) => {
+      return (
+        sum +
+        ex.sets.reduce((s, set) => {
+          if (set.completed && set.weightKg && set.reps) {
+            return s + set.weightKg * set.reps;
+          }
+          return s;
+        }, 0)
+      );
+    }, 0);
+  }, [activeWorkout]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+  const formattedElapsed = useMemo(() => {
+    const mins = Math.floor(elapsedTime / 60);
+    const secs = elapsedTime % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
+  }, [elapsedTime]);
 
-  const totalVolume = activeWorkout.exercises.reduce((sum, ex) => {
-    return (
-      sum +
-      ex.sets.reduce((s, set) => {
-        if (set.completed && set.weightKg && set.reps) {
-          return s + set.weightKg * set.reps;
-        }
-        return s;
-      }, 0)
-    );
-  }, 0);
+  const handleCompleteSet = useCallback(
+    (exerciseId: string, setIndex: number) => {
+      completeSet(exerciseId, setIndex);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      // Auto-start rest timer
+      setRestSeconds(restTimerDefault);
+      setRestActive(true);
+    },
+    [completeSet, restTimerDefault],
+  );
 
-  const handleCompleteSet = (exerciseId: string, setIndex: number) => {
-    completeSet(exerciseId, setIndex);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    // Auto-start rest timer
-    setRestSeconds(restTimerDefault);
-    setRestActive(true);
-  };
-
-  const handleFinish = async () => {
+  const handleFinish = useCallback(async () => {
     if (!user) return;
+    if (!activeWorkout) return;
     if (activeWorkout.exercises.length === 0) {
       Alert.alert(t('common.error'), t('workouts.noExercisesInWorkout'));
       return;
@@ -125,9 +130,9 @@ export default function ActiveWorkout() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [user, activeWorkout, t, finishWorkout, elapsedTime, totalVolume, router]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     Alert.alert(t('workouts.cancelWorkout'), t('workouts.progressLost'), [
       { text: t('workouts.keep'), style: 'cancel' },
       {
@@ -139,7 +144,20 @@ export default function ActiveWorkout() {
         },
       },
     ]);
-  };
+  }, [t, cancelWorkout, router]);
+
+  const handleAddExercise = useCallback(() => {
+    router.push('/(tabs)/workouts/exercise-picker');
+  }, [router]);
+
+  const handleSkipRest = useCallback(() => setRestActive(false), []);
+  const handleFinishRest = useCallback(() => setRestActive(false), []);
+  const handleAddRestTime = useCallback(
+    (delta: number) => setRestSeconds((prev) => Math.max(5, prev + delta)),
+    [],
+  );
+
+  if (!activeWorkout) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-dark-50">
@@ -150,7 +168,7 @@ export default function ActiveWorkout() {
         <View className="items-center">
           <Text className="text-lg font-bold text-dark-900">{activeWorkout.title}</Text>
           <Text className="text-sm text-primary-500" style={{ fontVariant: ['tabular-nums'] }}>
-            {formatTime(elapsedTime)}
+            {formattedElapsed}
           </Text>
         </View>
         <TouchableOpacity onPress={handleFinish} disabled={saving}>
@@ -185,45 +203,24 @@ export default function ActiveWorkout() {
             const displayName = getExerciseName(exercise.exerciseName, locale);
             const category = exercise.category || 'strength';
             return (
-              <Card key={exercise.exerciseId + exIndex} className="mb-4">
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-1">
-                    <Text className="font-bold text-dark-900 text-base">{displayName}</Text>
-                    <Text className="text-xs text-dark-400">
-                      {translateMuscle(exercise.muscleGroup)}
-                    </Text>
-                  </View>
-                  <TouchableOpacity onPress={() => removeExercise(exercise.exerciseId)}>
-                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
-
-                <SetHeader category={category} />
-
-                {exercise.sets.map((set, setIndex) => (
-                  <SetRow
-                    key={setIndex}
-                    set={set}
-                    category={category}
-                    onUpdate={(data) => updateSet(exercise.exerciseId, setIndex, data)}
-                    onComplete={() => handleCompleteSet(exercise.exerciseId, setIndex)}
-                  />
-                ))}
-
-                <TouchableOpacity
-                  onPress={() => addSet(exercise.exerciseId)}
-                  className="mt-3 py-2 bg-primary-50 rounded-lg items-center"
-                >
-                  <Text className="text-primary-600 font-semibold">{t('workouts.addSet')}</Text>
-                </TouchableOpacity>
-              </Card>
+              <ExerciseCard
+                key={exercise.exerciseId + exIndex}
+                exercise={exercise}
+                displayName={displayName}
+                muscleLabel={translateMuscle(exercise.muscleGroup)}
+                category={category}
+                onRemoveExercise={removeExercise}
+                onUpdateSet={updateSet}
+                onCompleteSet={handleCompleteSet}
+                onAddSet={addSet}
+              />
             );
           })
         )}
 
         <Button
           title={t('workouts.addExercise')}
-          onPress={() => router.push('/(tabs)/workouts/exercise-picker')}
+          onPress={handleAddExercise}
           variant="outline"
           fullWidth
         />
@@ -232,9 +229,9 @@ export default function ActiveWorkout() {
       {restActive && (
         <RestTimer
           seconds={restSeconds}
-          onSkip={() => setRestActive(false)}
-          onFinish={() => setRestActive(false)}
-          onAddTime={(delta) => setRestSeconds((prev) => Math.max(5, prev + delta))}
+          onSkip={handleSkipRest}
+          onFinish={handleFinishRest}
+          onAddTime={handleAddRestTime}
         />
       )}
     </SafeAreaView>

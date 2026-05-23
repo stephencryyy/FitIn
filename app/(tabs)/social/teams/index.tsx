@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/src/components/ui/Card';
 import { Button } from '@/src/components/ui/Button';
@@ -23,6 +23,8 @@ export default function TeamsScreen() {
 
   const isLoading = tab === 'mine' ? myTeams.isLoading : publicTeams.isLoading;
   const isRefetching = tab === 'mine' ? myTeams.isRefetching : publicTeams.isRefetching;
+  const isError = tab === 'mine' ? myTeams.isError : publicTeams.isError;
+  const error = tab === 'mine' ? myTeams.error : publicTeams.error;
   const teams = tab === 'mine' ? myTeams.data : publicTeams.data;
 
   const refetch = async () => {
@@ -30,13 +32,10 @@ export default function TeamsScreen() {
     else await publicTeams.refetch();
   };
 
-  // After creating/joining/leaving a team, the user lands back here.
-  // Force a refetch on focus so the membership change shows up.
-  useFocusEffect(
-    useCallback(() => {
-      myTeams.refetch();
-    }, [myTeams]),
-  );
+  // NOTE: no useFocusEffect refetch here. The list screen stays mounted in the
+  // Stack, so create/join/leave/delete mutations (which invalidate ['teams'])
+  // auto-refetch the active observer. A focus-effect refetch with the query
+  // object as a dependency caused an infinite refetch loop (endless spinner).
 
   const renderTeam = (team: TeamDocument) => (
     <Card
@@ -127,6 +126,17 @@ export default function TeamsScreen() {
 
       {isLoading ? (
         <LoadingSpinner fullScreen />
+      ) : isError ? (
+        <View className="flex-1 items-center justify-center px-8">
+          <Ionicons name="cloud-offline-outline" size={48} color="#94A3B8" />
+          <Text className="text-lg font-bold text-dark-900 text-center mt-4 mb-1">
+            {t('common.error')}
+          </Text>
+          <Text className="text-sm text-dark-400 text-center mb-6">
+            {__DEV__ && error?.message ? error.message : t('teams.noTeamsDesc')}
+          </Text>
+          <Button title={t('common.retry') || 'Retry'} onPress={refetch} variant="outline" />
+        </View>
       ) : !teams || teams.length === 0 ? (
         <EmptyState
           icon="people-outline"

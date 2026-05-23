@@ -44,6 +44,8 @@ export interface UserDocument {
   isPublic: boolean;
   stats: UserStats;
   settings: UserSettings;
+  /** Team ids the user belongs to. Maintained by create/join/leave. */
+  teamIds?: string[];
 }
 
 export interface OnboardingData {
